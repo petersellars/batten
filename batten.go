@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/dockersecuritytools/batten/batten"
 	"github.com/dockersecuritytools/batten/cli"
+	"github.com/dockersecuritytools/batten/machine"
 	"github.com/Sirupsen/logrus"
 	"gopkg.in/alecthomas/kingpin.v1"
 )
@@ -16,7 +17,7 @@ const (
 )
 
 var (
-	app      = kingpin.New(Name, Description)
+	app      = kingpin.New(Name, Description) 
 	// appDebug = app.Flag("debug", "Enable debug mode.").Bool()
 	serverIP  = app.Flag("server", "Connect to remote host.").String()
 	tlscacert = app.Flag("tlscacert", "TLS CA Certificate.").String()
@@ -46,10 +47,17 @@ func main() {
 		if len(*serverIP) > 0 {
 			remoteCheck()
 		} else {
+			jsonResults := []machine.CheckResult{}
 			for i, check := range batten.Checks {
 				results := batten.RunCheck(check)
 				cli.FormatResultsForConsole(i, results)
+				jsonCheck := machine.FormatResultsForMachine(i, results)
+				jsonResults = append(jsonResults, jsonCheck)
 			}
+			jsonString := machine.JSONResult {
+				CheckResults: 	jsonResults,
+			}
+			machine.ShowResults(&jsonString)
 		}
 	default:
 		app.Usage(os.Stdout)
