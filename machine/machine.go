@@ -2,6 +2,8 @@ package machine
 
 import (
 	"fmt"
+	"encoding/json"
+
 	"github.com/dockersecuritytools/batten/batten"
 )
 
@@ -10,9 +12,9 @@ type JSONResult struct {
 }
 
 type CheckResult struct {
-	checkid	int
-	result	string
-	name	string
+	Checkid	int		`json:"id"`
+	Result	string	`json:"result"`
+	Name	string	`json:"desc"`
 }
 
 
@@ -20,8 +22,6 @@ func FormatResultsForMachine(idx int, results *batten.CheckResults) CheckResult 
 	
 	checkdefinition := results.CheckDefinition
 
-	//fmt.Printf("[%d/%d]", idx+1, len(batten.Checks))
-	//fmt.Printf("%s", checkdefinition.Name())
     var resultString string	
 
 	if results.Error != nil {
@@ -35,9 +35,9 @@ func FormatResultsForMachine(idx int, results *batten.CheckResults) CheckResult 
 	}
 
 	return CheckResult{
-		checkid:	idx+1,
-		result:		resultString,
-		name:		checkdefinition.Name(),
+		Checkid:	idx+1,
+		Result:		resultString,
+		Name:		checkdefinition.Name(),
 	}
 }
 
@@ -45,10 +45,8 @@ func ShowResults(results *JSONResult) {
 	fmt.Printf("%s\n","{'checks:'")
 	fmt.Printf("%s","{")
 	for _, result := range results.CheckResults {
-		fmt.Printf("[%d:%s:%s]", 
-			result.checkid,
-			result.result,
-			result.name)
+		jsonString,_ := json.Marshal(result)
+		fmt.Println(string(jsonString))
 	}
 	fmt.Printf("}\n%s","}")
 }
